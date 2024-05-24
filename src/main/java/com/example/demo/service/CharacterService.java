@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.CharacterEntity;
+import com.example.demo.exeption.CharacterNotFoundException;
 import com.example.demo.repository.CharacterRepository;
 import com.example.demo.repository.SwapiResponse;
 import com.example.demo.rest.SwapiRestClient;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class CharacterService {
@@ -53,8 +55,14 @@ public class CharacterService {
     }
 
     public CharacterEntity getCharacterById(Long id) {
-        return characterRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Character not found with id: " + id));
+        Optional<CharacterEntity> characterOptional = characterRepository.findById(id);
+        if (characterOptional.isPresent()) {
+            CharacterEntity character = characterOptional.get();
+            character.setQueryCount(character.getQueryCount() + 1);
+            return characterRepository.save(character);
+        } else {
+            throw new CharacterNotFoundException(id);
+        }
     }
 
     public CharacterEntity findById(Long id) {

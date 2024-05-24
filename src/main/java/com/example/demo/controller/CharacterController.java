@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.entity.CharacterEntity;
+import com.example.demo.exeption.CharacterNotFoundException;
 import com.example.demo.service.CharacterService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/characters")
@@ -45,11 +47,16 @@ public class CharacterController {
     })
     public ResponseEntity<CharacterEntity> getCharacterById(@PathVariable Long id) {
         try {
+            System.out.println("Searching for character with ID: " + id);
             CharacterEntity character = characterService.getCharacterById(id);
+            System.out.println("Character found: " + character.getName());
             return ResponseEntity.ok(character);
-        } catch (IllegalArgumentException ex) {
+        } catch (CharacterNotFoundException ex) {
+            System.out.println("Character not found with ID: " + id);
             return ResponseEntity.notFound().build();
         } catch (Exception ex) {
+            System.out.println("Error occurred while searching for character with ID: " + id);
+            ex.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
